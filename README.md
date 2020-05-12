@@ -53,7 +53,7 @@ new Vue({
 }).$mount('#app');
 ```
 
-## Add a Plugin
+## Add an Object Plugin
 
 The Vue API documentation for adding a plugin states:
 
@@ -72,3 +72,38 @@ The Vue API documentation for adding a plugin states:
 > When this method is called on the same plugin multiple times, the plugin will be installed only once.
 
 * See also: Plugins
+
+### TypeScript Signature
+
+``` typescript
+use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): VueConstructor<V>;
+use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): VueConstructor<V>;
+```
+
+### Create the Plugin
+
+``` typescript
+import Vue from 'vue';
+
+export default class ObjectPlugin {
+  public static install(vue: typeof Vue, options?: any): void {
+    console.log('Installing ObjectPlugin.');
+  }
+}
+```
+
+### Install the Plugin
+
+``` typescript
+import Vue from 'vue';
+import App from './App.vue';
+import ObjectPlugin from './plugins/object-plugin';
+
+Vue.config.productionTip = false;
+
+Vue.use(ObjectPlugin);
+
+new Vue({
+  render: (h) => h(App),
+}).$mount('#app');
+```
