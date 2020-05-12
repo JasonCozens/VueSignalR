@@ -75,9 +75,24 @@ The Vue API documentation for adding a plugin states:
 
 ### TypeScript Signature
 
+The TypeScript signature for the Vue.use function is:
+
 ``` typescript
 use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): VueConstructor<V>;
 use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): VueConstructor<V>;
+```
+
+PluginObject and PluginFunction are defined in plugin.d.ts.
+
+``` typescript
+import { Vue as _Vue } from "./vue";
+
+export type PluginFunction<T> = (Vue: typeof _Vue, options?: T) => void;
+
+export interface PluginObject<T> {
+  install: PluginFunction<T>;
+  [key: string]: any;
+}
 ```
 
 ### Create the Plugin
