@@ -53,7 +53,7 @@ new Vue({
 }).$mount('#app');
 ```
 
-## Add an Object Plugin
+## Add a PluginObject
 
 The Vue API documentation for adding a plugin states:
 
@@ -117,6 +117,30 @@ import ObjectPlugin from './plugins/object-plugin';
 Vue.config.productionTip = false;
 
 Vue.use(ObjectPlugin);
+
+new Vue({
+  render: (h) => h(App),
+}).$mount('#app');
+```
+
+### Run the Application
+
+```
+npm run serve
+```
+
+Look at the console output.
+
+## Add a PluginObject with Options
+
+``` typescript
+import Vue from 'vue';
+import App from './App.vue';
+import ObjectPlugin from './object-plugin';
+
+Vue.config.productionTip = false;
+
+Vue.use(ObjectPlugin, 'ObjectPlugin Options.');
 
 new Vue({
   render: (h) => h(App),
