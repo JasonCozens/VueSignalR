@@ -133,6 +133,21 @@ Look at the console output.
 
 ## Add a PluginObject with Options
 
+### Modify ObjectPlugin
+
+``` typescript
+import _Vue from 'vue';
+
+export default class ObjectPlugin {
+  static install(Vue: typeof _Vue, options?: any): void {
+    console.log('Installing ObjectPlugin.');
+    console.log(options);
+  }
+}
+```
+
+### Amend Vue.use
+
 ``` typescript
 import Vue from 'vue';
 import App from './App.vue';
