@@ -161,3 +161,63 @@ new Vue({
   render: (h) => h(App),
 }).$mount('#app');
 ```
+
+## Augmenting Types for Use with Plugins
+
+Now we can add the plugin we want to be able to share objects with the Vue components.
+
+``` typescript
+// hub-connection.d.ts
+import Vue from 'vue'
+
+declare module 'vue/types/vue' {
+
+  interface VueConstructor {
+    $hubConnection: string
+  }
+}
+```
+
+We can no assign a value to the global Vue variable.
+
+``` typescript
+import _Vue from 'vue';
+import SignalROptions from './signalr-options';
+
+export default class SignalRConnection {
+  static install(Vue: typeof _Vue, options?: SignalROptions): void {
+    console.log('Installing SignalRConnection.');
+    console.log(options);
+
+    _Vue.$hubConnection = 'SignalR Hub Connection';
+  }
+}
+```
+
+### App.vue
+
+We can use this vue in the Vue components.
+
+``` html
+<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <h1>{{ hubConnection }}</h1>
+    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  </div>
+</template>
+```
+
+``` typescript
+@Component({
+  components: {
+    HelloWorld,
+  },
+})
+export default class App extends Vue {
+  public hubConnection = Vue.$hubConnection;
+}
+</script>
+```
+
+And similarly in any other Vue component.
