@@ -15,6 +15,8 @@ Vue + TypeScript + BoostrapVue + ASP.NET Core + SignalR
     + [Amend Vue.use](#amend-vueuse)
   * [Augmenting Types for Use with Plugins](#augmenting-types-for-use-with-plugins)
     + [App.vue](#appvue)
+    
+* [VueSignalR Wiki](../../wiki)
 
 ## vuesr-01 - Writing a Vue Plugin
 
