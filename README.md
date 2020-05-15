@@ -1,6 +1,23 @@
 # VueSignalR
 Vue + TypeScript + BoostrapVue + ASP.NET Core + SignalR
 
+- [VueSignalR](#vuesignalr)
+  * [vuesr-01 - Writing a Vue Plugin](#vuesr-01---writing-a-vue-plugin)
+    + [index.html - Entry Point - pre-compilation](#indexhtml---entry-point---pre-compilation)
+    + [main.ts](#maints)
+  * [Add a PluginObject](#add-a-pluginobject)
+    + [TypeScript Signature](#typescript-signature)
+    + [Create the Plugin](#create-the-plugin)
+    + [Install the Plugin](#install-the-plugin)
+    + [Run the Application](#run-the-application)
+  * [Add a PluginObject with Options](#add-a-pluginobject-with-options)
+    + [Modify ObjectPlugin](#modify-objectplugin)
+    + [Amend Vue.use](#amend-vueuse)
+  * [Augmenting Types for Use with Plugins](#augmenting-types-for-use-with-plugins)
+    + [App.vue](#appvue)
+    
+* [VueSignalR Wiki](../../wiki)
+
 ## vuesr-01 - Writing a Vue Plugin
 
 ``` powershell
