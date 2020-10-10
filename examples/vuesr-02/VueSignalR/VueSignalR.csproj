@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>NewName</AssemblyName>
+    <RootNamespace>VueSignalR.Top</RootNamespace>
+    <PackageId>NewNameXXXX</PackageId>
+    <RepositoryUrl>https://next-tfs.co.uk/REPO</RepositoryUrl>
+    <Description>123415-182891908109902</Description>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <Authors>NewName 1</Authors>
+    <Product>NewName 3</Product>
+    <Copyright>next plc</Copyright>
+    <PackageProjectUrl>PURL</PackageProjectUrl>
+    <PackageTags>TAG TAG</PackageTags>
+    <PackageReleaseNotes>NOTES</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,5 +10,21 @@ export default class ChatHubConnection {
     Vue.$chatHubConnection = new HubConnectionBuilder()
       .withUrl(options.hubUrl)
       .build();
+
+    function start() {
+      let startedPromise: Promise<void> = Vue.$chatHubConnection.start()
+        .catch(err => {
+          console.error('Failed to connect with hub', err);
+          return new Promise((resolve, reject) => setTimeout(() => start().then(resolve).catch(reject), 5000))
+        })
+      return startedPromise;
+    }
+    Vue.$chatHubConnection.onclose(() => {
+      if (!manuallyClosed) start();
+    })
+
+    // Start everything
+    let manuallyClosed = false;
+    start();
   }
 }
