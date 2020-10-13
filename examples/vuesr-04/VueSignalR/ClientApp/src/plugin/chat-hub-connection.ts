@@ -1,5 +1,5 @@
 import _Vue from 'vue';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import SignalROptions from './signalr-options';
 
 export default class ChatHubConnection {
@@ -11,23 +11,20 @@ export default class ChatHubConnection {
       .withUrl(options.hubUrl)
       .build();
 
-    const manuallyClosed = false;
-
     function start() {
-      const startedPromise: Promise<void> = Vue.$chatHubConnection.start()
-        .catch((err) => {
+      let startedPromise: Promise<void> = Vue.$chatHubConnection.start()
+        .catch(err => {
           console.error('Failed to connect with hub', err);
-          return new Promise((resolve, reject) => setTimeout(
-            () => start().then(resolve).catch(reject), 5000,
-          ));
-        });
+          return new Promise((resolve, reject) => setTimeout(() => start().then(resolve).catch(reject), 5000))
+        })
       return startedPromise;
     }
     Vue.$chatHubConnection.onclose(() => {
       if (!manuallyClosed) start();
-    });
+    })
 
     // Start everything
+    let manuallyClosed = false;
     start();
   }
 }
