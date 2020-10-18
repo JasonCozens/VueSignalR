@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h3>SignalR Chat Example</h3>
+    <h3>Banter</h3>
     <textarea rows="10" cols="50" v-model="conversation"></textarea>
     <br>
     <input placeholder="What do you want to say?"  v-model="message">
@@ -21,7 +21,7 @@ export default class HelloWorld extends Vue {
   public message = '';
 
   public created() {
-    this.conversation = 'created';
+    this.conversation = '';
     Vue.$chatHubConnection.on('newMessage', (name, message) => this.onNewMessage(name, message));
   }
 
