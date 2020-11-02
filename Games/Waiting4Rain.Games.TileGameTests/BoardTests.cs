@@ -13,8 +13,10 @@ namespace Waiting4Rain.Games.TileGameTests
             var boardA = new Board();
             var boardB = new Board();
 
-            Assert.Equal(boardA, boardB);
-            Assert.Equal(boardB, boardA);
+            Assert.True(boardA.Equals(boardB));
+            Assert.True(boardB.Equals(boardA));
+            Assert.True(boardA == boardB);
+            Assert.True(boardB == boardA);
         }
 
         [Fact]
@@ -28,6 +30,8 @@ namespace Waiting4Rain.Games.TileGameTests
 
             Assert.NotEqual(boardA, boardB);
             Assert.NotEqual(boardB, boardA);
+            Assert.True(boardA != boardB);
+            Assert.True(boardB != boardA);
         }
 
         [Fact]
@@ -44,6 +48,8 @@ namespace Waiting4Rain.Games.TileGameTests
 
             Assert.Equal(boardA, boardB);
             Assert.Equal(boardB, boardA);
+            Assert.True(boardA == boardB);
+            Assert.True(boardB == boardA);
         }
 
         [Fact]
@@ -60,8 +66,10 @@ namespace Waiting4Rain.Games.TileGameTests
                 new List<string> { "T3", "T4" }
             };
 
-            Assert.Equal(boardA, boardB);
+            Assert.True(boardA == boardB);
             Assert.Equal(boardB, boardA);
+            Assert.True(boardA == boardB);
+            Assert.True(boardB == boardA);
         }
 
         [Fact]
@@ -80,6 +88,8 @@ namespace Waiting4Rain.Games.TileGameTests
 
             Assert.NotEqual(boardA, boardB);
             Assert.NotEqual(boardB, boardA);
+            Assert.True(boardA != boardB);
+            Assert.True(boardB != boardA);
         }
     }
 }
