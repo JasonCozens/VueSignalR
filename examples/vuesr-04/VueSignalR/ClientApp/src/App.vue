@@ -23,7 +23,7 @@
           <p>One day the drops unite</p>
           <p>And the tides turn</p>
           <p>Sweet relief the clouds break</p>
-          <p>For the gift of life is water</p>
+          <p>For water is the gift of life</p>
         </b-tab>
       </b-tabs>
     </b-container>

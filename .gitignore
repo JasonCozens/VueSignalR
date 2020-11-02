@@ -352,3 +352,10 @@ MigrationBackup/
 # Vue js files
 **/ClientApp/**/*.js
 **/ClientApp/**/*.js.map
+/examples/vuesr-04/VueSignalR/wwwroot/dist
+/examples/vuesr-04/VueSignalR/wwwroot/js/chunk-vendors.3c9024a4.js.map
+/examples/vuesr-04/VueSignalR/wwwroot/js/chunk-vendors.3c9024a4.js
+/examples/vuesr-04/VueSignalR/wwwroot/js/app.ff4ec6d6.js.map
+/examples/vuesr-04/VueSignalR/wwwroot/js/app.ff4ec6d6.js
+/examples/vuesr-04/VueSignalR/wwwroot/css/chunk-vendors.9ab3d38a.css
+/examples/vuesr-04/VueSignalR/wwwroot/css/app.0dd12e26.css
