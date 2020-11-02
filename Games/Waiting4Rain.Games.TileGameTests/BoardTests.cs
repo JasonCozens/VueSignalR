@@ -45,5 +45,41 @@ namespace Waiting4Rain.Games.TileGameTests
             Assert.Equal(boardA, boardB);
             Assert.Equal(boardB, boardA);
         }
+
+        [Fact]
+        public void ManyItems_Equals_NewBoardsAreEqual()
+        {
+            var boardA = new Board
+            {
+                new List<string> { "T1", "T2" },
+                new List<string> { "T3", "T4" }
+            };
+            var boardB = new Board
+            {
+                new List<string> { "T1", "T2" },
+                new List<string> { "T3", "T4" }
+            };
+
+            Assert.Equal(boardA, boardB);
+            Assert.Equal(boardB, boardA);
+        }
+
+        [Fact]
+        public void ManyItems_NotEquals_NewBoardsAreEqual()
+        {
+            var boardA = new Board
+            {
+                new List<string> { "T1", "T2" },
+                new List<string> { "T3", "T4" }
+            };
+            var boardB = new Board
+            {
+                new List<string> { "T1", "T2" },
+                new List<string> { "T5", "T4" }
+            };
+
+            Assert.NotEqual(boardA, boardB);
+            Assert.NotEqual(boardB, boardA);
+        }
     }
 }
