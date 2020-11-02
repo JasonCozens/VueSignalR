@@ -28,4 +28,8 @@
     <Folder Include="Hooks\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Waiting4Rain.Games.TileGame\Waiting4Rain.Games.TileGame.csproj" />
+  </ItemGroup>
+
 </Project>
