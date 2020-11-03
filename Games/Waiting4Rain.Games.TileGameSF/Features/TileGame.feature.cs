@@ -100,6 +100,10 @@ this.ScenarioInitialize(scenarioInfo);
                             "ROW"});
                 table1.AddRow(new string[] {
                             "T1 T2 T3"});
+                table1.AddRow(new string[] {
+                            "T4 T5 T6"});
+                table1.AddRow(new string[] {
+                            "T7 T8 __"});
 #line 4
  testRunner.Given("the final position is:", ((string)(null)), table1, "Given ");
 #line hidden
@@ -107,6 +111,10 @@ this.ScenarioInitialize(scenarioInfo);
                             "ROW"});
                 table2.AddRow(new string[] {
                             "T1 T2 T3"});
+                table2.AddRow(new string[] {
+                            "T4 T5 T6"});
+                table2.AddRow(new string[] {
+                            "T7 T8 __"});
 #line 9
  testRunner.Then("the board is:", ((string)(null)), table2, "Then ");
 #line hidden

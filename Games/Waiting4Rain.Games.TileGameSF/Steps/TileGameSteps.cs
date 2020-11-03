@@ -7,6 +7,7 @@ using TechTalk.SpecFlow;
 using Waiting4Rain.Games.TileGame;
 using FluentAssertions;
 using FluentAssertions.Common;
+using Xunit;
 
 namespace Waiting4Rain.Games.TileGameSF.Steps
 {
@@ -52,7 +53,7 @@ namespace Waiting4Rain.Games.TileGameSF.Steps
         public void ThenTheBoardIs(Table table)
         {
             var finalBoard = new SpecFlowBoard(table);
-            finalBoard.Should().Equal(TileGameContext.Board);
+            Assert.Equal(finalBoard, TileGameContext.Board);
         }
     }
 }
