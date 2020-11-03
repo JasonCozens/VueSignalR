@@ -5,8 +5,28 @@ using Xunit;
 
 namespace Waiting4Rain.Games.TileGameTests
 {
-    public class BoardTests
+    public class BoardEqualsTests
     {
+        [Fact]
+        public void Board_NotEqual_ToNull()
+        {
+            var board = new Board();
+
+            Assert.False(board.Equals(null));
+            Assert.False(board == null);
+        }
+
+        [Fact]
+        public void Board_Equals_IsReflexive()
+        {
+            var board = new Board();
+
+            Assert.True(board.Equals(board));
+#pragma warning disable CS1718 // Comparison made to same variable
+            Assert.True(board == board);
+#pragma warning restore CS1718 // Comparison made to same variable
+        }
+
         [Fact]
         public void NewBoards_Equals_NewBoardsAreEqual()
         {
