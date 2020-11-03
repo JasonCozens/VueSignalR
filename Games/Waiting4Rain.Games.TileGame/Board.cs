@@ -6,6 +6,8 @@ namespace Waiting4Rain.Games.TileGame
 {
     public class Board : List<List<string>>
     {
+        public const string FreeCell = "__";
+
         public void MoveTile(string direction)
         {
             var xOffset = 0;
@@ -18,14 +20,14 @@ namespace Waiting4Rain.Games.TileGame
             int col = -1;
             for (var r = 0; r < Count; r++)
             {
-                if (this[r].Contains("__"))
+                if (this[r].Contains(FreeCell))
                 {
                     row = r;
-                    col = this[r].IndexOf("__");
+                    col = this[r].IndexOf(FreeCell);
                 }
             }
             this[row][col] = this[row + yOffset][col +xOffset];
-            this[row + yOffset][col + xOffset] = "__";
+            this[row + yOffset][col + xOffset] = FreeCell;
         }
 
         public static bool operator ==(Board leftBoard, Board rightBoard)
