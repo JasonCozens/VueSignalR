@@ -55,12 +55,9 @@ namespace Waiting4Rain.Games.TileGame
 
         public override bool Equals(object obj)
         {
+            if (obj == null) return false;
+            if (GetType() != obj.GetType()) return false;
             Board other = obj as Board;
-            if (other == null)
-            {
-                return false;
-            }
-            // Test type equality.
             if (Count != other.Count)
                 return false;
             for (var r = 0; r < Count; r++)

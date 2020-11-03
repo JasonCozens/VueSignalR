@@ -24,6 +24,17 @@ namespace Waiting4Rain.Games.TileGameTests
             Assert.False(board.Equals("A STRING"));
         }
 
+        public class BoardChild : Board { }
+
+        [Fact]
+        public void Board_NotEqual_ToDerivedType()
+        {
+            var board = new Board();
+            var child = new BoardChild();
+
+            Assert.False(board == child);
+        }
+
         [Fact]
         public void Board_Equals_IsReflexive()
         {
