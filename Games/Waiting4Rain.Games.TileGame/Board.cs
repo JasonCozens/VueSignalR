@@ -36,11 +36,11 @@ namespace Waiting4Rain.Games.TileGame
             {
                 return true;
             }
-            if (ReferenceEquals(leftBoard, null))
+            if (leftBoard is null)
             {
                 return false;
             }
-            if (ReferenceEquals(rightBoard, null))
+            if (rightBoard is null)
             {
                 return false;
             }
