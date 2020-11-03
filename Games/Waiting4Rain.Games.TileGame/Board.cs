@@ -1,10 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Reflection.Metadata.Ecma335;
 
 namespace Waiting4Rain.Games.TileGame
 {
     public class Board : List<List<string>>
     {
+        public void MoveTile(string direction)
+        {
+            var xOffset = 0;
+            var yOffset = 0;
+            if (direction == "right") xOffset = -1;
+            if (direction == "up") yOffset = 1;
+            int row = -1;
+            int col = -1;
+            for (var r = 0; r < Count; r++)
+            {
+                if (this[r].Contains("__"))
+                {
+                    row = r;
+                    col = this[r].IndexOf("__");
+                }
+            }
+            this[row][col] = this[row + yOffset][col +xOffset];
+            this[row + yOffset][col + xOffset] = "__";
+        }
+
         public static bool operator ==(Board leftBoard, Board rightBoard)
         {
             if (ReferenceEquals(leftBoard, rightBoard))

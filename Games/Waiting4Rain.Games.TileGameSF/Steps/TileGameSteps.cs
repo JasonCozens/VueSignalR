@@ -43,12 +43,18 @@ namespace Waiting4Rain.Games.TileGameSF.Steps
 
         internal TileGameContext TileGameContext { get; }
 
-        [Given(@"the final position is:")]
-        public void GivenTheFinalPositionIs(Table table)
+        [Given(@"the current position is:")]
+        public void GivenTheCurrentPositionIs(Table table)
         {
             TileGameContext.Board = new SpecFlowBoard(table);
         }
-        
+
+        [When(@"I move a tile '(.*)'")]
+        public void WhenIMoveATile(string direction)
+        {
+            TileGameContext.Board.MoveTile(direction);
+        }
+
         [Then(@"the board is:")]
         public void ThenTheBoardIs(Table table)
         {
