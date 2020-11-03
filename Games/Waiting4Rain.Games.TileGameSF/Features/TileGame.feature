@@ -37,3 +37,29 @@ Scenario: Free cell in centre, move up.
 	| T1 T2 T3 |
 	| T4 T7 T5 |
 	| T6 __ T8 |
+
+Scenario: Free cell in centre, move left.
+	Given the current position is:
+	| Board	   |
+	| T1 T2 T3 |
+	| T4 __ T5 |
+	| T6 T7 T8 |
+	When I move a tile 'left'
+	Then the board is:
+	| Board	   |
+	| T1 T2 T3 |
+	| T4 T5 __ |
+	| T6 T7 T8 |
+
+Scenario: Free cell in centre, move down.
+	Given the current position is:
+	| Board	   |
+	| T1 T2 T3 |
+	| T4 __ T5 |
+	| T6 T7 T8 |
+	When I move a tile 'down'
+	Then the board is:
+	| Board	   |
+	| T1 __ T3 |
+	| T4 T2 T5 |
+	| T6 T7 T8 |

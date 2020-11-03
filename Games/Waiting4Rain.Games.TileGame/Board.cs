@@ -11,7 +11,9 @@ namespace Waiting4Rain.Games.TileGame
             var xOffset = 0;
             var yOffset = 0;
             if (direction == "right") xOffset = -1;
+            if (direction == "left") xOffset = 1;
             if (direction == "up") yOffset = 1;
+            if (direction == "down") yOffset = -1;
             int row = -1;
             int col = -1;
             for (var r = 0; r < Count; r++)
