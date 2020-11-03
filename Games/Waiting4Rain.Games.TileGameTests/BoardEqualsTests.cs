@@ -17,6 +17,14 @@ namespace Waiting4Rain.Games.TileGameTests
         }
 
         [Fact]
+        public void Board_NotEqual_ToDifferentType()
+        {
+            var board = new Board();
+
+            Assert.False(board.Equals("A STRING"));
+        }
+
+        [Fact]
         public void Board_Equals_IsReflexive()
         {
             var board = new Board();
@@ -40,8 +48,8 @@ namespace Waiting4Rain.Games.TileGameTests
             Assert.True(boardB == boardA);
         }
 
-        // Make this a theory.
         [Fact]
+        // Make this a theory.
         public void Boards_Equals_IsTransitive()
         {
             var boardA = new Board();
@@ -54,12 +62,42 @@ namespace Waiting4Rain.Games.TileGameTests
             Assert.True(boardB == boardC);
         }
 
-        [Fact]
-        public void NewBoards_Equals_NewBoardsAreEqual()
+        public static IEnumerable<object[]> GetBoards()
         {
-            var boardA = new Board();
-            var boardB = new Board();
+            yield return new object[]
+            {
+                new Board(),
+                new Board()
+            };
+            yield return new object[]
+            {
+                new Board{ new List<string> { "T1" } },
+                new Board{ new List<string> { "T1" } }
+            };
+            yield return new object[]
+            {
+                new Board{ new List<string> { "T1", "T2", "T3" } },
+                new Board{ new List<string> { "T1", "T2", "T3" } }
+            };
+            yield return new object[]
+            {
+                new Board{
+                    new List<string> { "T1", "T2", "T3" },
+                    new List<string> { "T4", "T5", "T6" },
+                    new List<string> { "T7", "T8", "T9" }
+                },
+                new Board{
+                    new List<string> { "T1", "T2", "T3" },
+                    new List<string> { "T4", "T5", "T6" },
+                    new List<string> { "T7", "T8", "T9" }
+                }
+            };
+        }
 
+        [Theory]
+        [MemberData(nameof(GetBoards), MemberType = typeof(BoardEqualsTests))]
+        public void TwoBoards_Equals_TwoBoardsAreEqual(Board boardA, Board boardB)
+        {
             Assert.True(boardA.Equals(boardB));
             Assert.True(boardB.Equals(boardA));
             Assert.True(boardA == boardB);
