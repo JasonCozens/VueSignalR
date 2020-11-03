@@ -26,6 +26,10 @@ namespace Waiting4Rain.Games.TileGame
                     col = this[r].IndexOf(FreeCell);
                 }
             }
+            if (col == 0 & direction == "right") return;
+            if (row == 0 & direction == "down") return;
+            if (col == this[0].Count - 1 & direction == "left") return;
+            if (row == Count -1 & direction == "up") return;
             this[row][col] = this[row + yOffset][col +xOffset];
             this[row + yOffset][col + xOffset] = FreeCell;
         }

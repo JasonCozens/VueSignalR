@@ -341,6 +341,226 @@ this.ScenarioInitialize(scenarioInfo);
             }
             this.ScenarioCleanup();
         }
+        
+        [TechTalk.SpecRun.ScenarioAttribute("Free cell on left, move right.", SourceLine=66)]
+        public virtual void FreeCellOnLeftMoveRight_()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Free cell on left, move right.", null, tagsOfScenario, argumentsOfScenario);
+#line 67
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table11 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table11.AddRow(new string[] {
+                            "T1 T2 T3"});
+                table11.AddRow(new string[] {
+                            "__ T4 T5"});
+                table11.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 68
+ testRunner.Given("the current position is:", ((string)(null)), table11, "Given ");
+#line hidden
+#line 73
+ testRunner.When("I move a tile \'right\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table12 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table12.AddRow(new string[] {
+                            "T1 T2 T3"});
+                table12.AddRow(new string[] {
+                            "__ T4 T5"});
+                table12.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 74
+ testRunner.Then("the board is:", ((string)(null)), table12, "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [TechTalk.SpecRun.ScenarioAttribute("Free cell at top, move down.", SourceLine=79)]
+        public virtual void FreeCellAtTopMoveDown_()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Free cell at top, move down.", null, tagsOfScenario, argumentsOfScenario);
+#line 80
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table13 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table13.AddRow(new string[] {
+                            "T1 __ T3"});
+                table13.AddRow(new string[] {
+                            "T4 T2 T5"});
+                table13.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 81
+ testRunner.Given("the current position is:", ((string)(null)), table13, "Given ");
+#line hidden
+#line 86
+ testRunner.When("I move a tile \'down\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table14 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table14.AddRow(new string[] {
+                            "T1 __ T3"});
+                table14.AddRow(new string[] {
+                            "T4 T2 T5"});
+                table14.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 87
+ testRunner.Then("the board is:", ((string)(null)), table14, "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [TechTalk.SpecRun.ScenarioAttribute("Free cell on right, move left.", SourceLine=92)]
+        public virtual void FreeCellOnRightMoveLeft_()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Free cell on right, move left.", null, tagsOfScenario, argumentsOfScenario);
+#line 93
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table15 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table15.AddRow(new string[] {
+                            "T1 T2 T3"});
+                table15.AddRow(new string[] {
+                            "T4 T5 __"});
+                table15.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 94
+ testRunner.Given("the current position is:", ((string)(null)), table15, "Given ");
+#line hidden
+#line 99
+ testRunner.When("I move a tile \'left\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table16 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table16.AddRow(new string[] {
+                            "T1 T2 T3"});
+                table16.AddRow(new string[] {
+                            "T4 T5 __"});
+                table16.AddRow(new string[] {
+                            "T6 T7 T8"});
+#line 100
+ testRunner.Then("the board is:", ((string)(null)), table16, "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [TechTalk.SpecRun.ScenarioAttribute("Free cell at bottom, move up.", SourceLine=105)]
+        public virtual void FreeCellAtBottomMoveUp_()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Free cell at bottom, move up.", null, tagsOfScenario, argumentsOfScenario);
+#line 106
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table17 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table17.AddRow(new string[] {
+                            "T1 T7 T3"});
+                table17.AddRow(new string[] {
+                            "T4 T2 T5"});
+                table17.AddRow(new string[] {
+                            "T6 __ T8"});
+#line 107
+ testRunner.Given("the current position is:", ((string)(null)), table17, "Given ");
+#line hidden
+#line 112
+ testRunner.When("I move a tile \'up\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table18 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Board"});
+                table18.AddRow(new string[] {
+                            "T1 T7 T3"});
+                table18.AddRow(new string[] {
+                            "T4 T2 T5"});
+                table18.AddRow(new string[] {
+                            "T6 __ T8"});
+#line 113
+ testRunner.Then("the board is:", ((string)(null)), table18, "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
     }
 }
 #pragma warning restore
