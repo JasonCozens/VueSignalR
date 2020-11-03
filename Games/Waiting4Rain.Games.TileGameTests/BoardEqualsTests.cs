@@ -67,9 +67,28 @@ namespace Waiting4Rain.Games.TileGameTests
         }
 
         [Fact]
-        public void NewBoardANewBoardB1Item_Equals_NewBoardsAreEqual()
+        public void Boards_Equals_DifferentRowCount()
         {
             var boardA = new Board();
+            var boardB = new Board
+            {
+                new List<string> { "T1" }
+            };
+
+            Assert.NotEqual(boardA, boardB);
+            Assert.NotEqual(boardB, boardA);
+            Assert.True(boardA != boardB);
+            Assert.True(boardB != boardA);
+        }
+
+        [Fact]
+        public void Boards_Equals_DifferentColCount()
+        {
+            var boardA = new Board
+            {
+                new List<string> { "T1", "T2" }
+            };
+
             var boardB = new Board
             {
                 new List<string> { "T1" }
@@ -93,8 +112,8 @@ namespace Waiting4Rain.Games.TileGameTests
                 new List<string> { "T1" }
             };
 
-            Assert.Equal(boardA, boardB);
-            Assert.Equal(boardB, boardA);
+            Assert.True(boardA.Equals(boardB));
+            Assert.True(boardB.Equals(boardA));
             Assert.True(boardA == boardB);
             Assert.True(boardB == boardA);
         }

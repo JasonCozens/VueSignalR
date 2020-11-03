@@ -1,30 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Waiting4Rain.Games.TileGame
 {
     public class Board : List<List<string>>
     {
-        public static bool operator ==(Board obj1, Board obj2)
+        public static bool operator ==(Board leftBoard, Board rightBoard)
         {
-            if (ReferenceEquals(obj1, obj2))
+            if (ReferenceEquals(leftBoard, rightBoard))
             {
                 return true;
             }
-            if (ReferenceEquals(obj1, null))
+            if (ReferenceEquals(leftBoard, null))
             {
                 return false;
             }
-            if (ReferenceEquals(obj2, null))
+            if (ReferenceEquals(rightBoard, null))
             {
                 return false;
             }
 
-            return obj1.Equals(obj2);
+            return leftBoard.Equals(rightBoard);
         }
 
-        public static bool operator !=(Board obj1, Board obj2)
+        public static bool operator !=(Board leftBoard, Board rightBoard)
         {
-            return !(obj1 == obj2);
+            return !(leftBoard == rightBoard);
         }
 
         public override bool Equals(object obj)
@@ -34,13 +35,27 @@ namespace Waiting4Rain.Games.TileGame
             {
                 return false;
             }
-            if (this.Count == 0 & other.Count == 0)
-                return true;
-            return base.Equals(obj);
+            // Test type equality.
+            if (Count != other.Count)
+                return false;
+            for (var r = 0; r < Count; r++)
+            {
+                if (this[r].Count != other[r].Count) return false;
+            }
+            for (var r = 0; r < Count; r++)
+            {
+                for (var c = 0; c < this[r].Count; c++)
+                {
+                    if (!this[r][c].Equals(other[r][c])) return false;
+                }
+            }
+
+            return true;
         }
 
         public override int GetHashCode()
         {
+            // This is not a good idea - see Richter.
             return base.GetHashCode();
         }
     }
