@@ -27,6 +27,33 @@ namespace Waiting4Rain.Games.TileGameTests
 #pragma warning restore CS1718 // Comparison made to same variable
         }
 
+        // Make this a theory.
+        [Fact]
+        public void Boards_Equals_IsSymmetric()
+        {
+            var boardA = new Board();
+            var boardB = new Board();
+
+            Assert.True(boardA.Equals(boardB));
+            Assert.True(boardB.Equals(boardA));
+            Assert.True(boardA == boardB);
+            Assert.True(boardB == boardA);
+        }
+
+        // Make this a theory.
+        [Fact]
+        public void Boards_Equals_IsTransitive()
+        {
+            var boardA = new Board();
+            var boardB = new Board();
+            var boardC = new Board();
+
+            Assert.True(boardA.Equals(boardB));
+            Assert.True(boardB.Equals(boardC));
+            Assert.True(boardA == boardB);
+            Assert.True(boardB == boardC);
+        }
+
         [Fact]
         public void NewBoards_Equals_NewBoardsAreEqual()
         {
