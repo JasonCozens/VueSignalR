@@ -25,18 +25,20 @@ namespace Waiting4Rain.ConsoleStudy
                 new List<string>{ "U", "V", "W", "X", "_" }
             };
 
+            Shuffle(board, 2500);
+
             while (true)
             {
                 DisplayBoard(board);
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.UpArrow) board.MoveTile("up");
-                if (key == ConsoleKey.RightArrow) board.MoveTile("right");
-                if (key == ConsoleKey.DownArrow) board.MoveTile("down");
-                if (key == ConsoleKey.LeftArrow) board.MoveTile("left");
+                if (key == ConsoleKey.UpArrow) board.MoveTile("down");
+                if (key == ConsoleKey.RightArrow) board.MoveTile("left");
+                if (key == ConsoleKey.DownArrow) board.MoveTile("up");
+                if (key == ConsoleKey.LeftArrow) board.MoveTile("right");
             }
         }
 
-        private static void DisplayBoard(List<List<string>> board)
+        private static void DisplayBoard(Board board)
         {
             for (int row = 0; row < board.Count; row++)
             {
@@ -46,6 +48,26 @@ namespace Waiting4Rain.ConsoleStudy
                     Console.CursorLeft = 2 + 2 * col;
                     Console.Write(board[row][col]);
                 }
+            }
+        }
+
+        private static void Shuffle(Board board, int shuffleCount)
+        {
+            var map = new Dictionary<int, string>
+            {
+                { 0, "left" },
+                { 1, "up" },
+                { 2, "right" },
+                { 3, "down" }
+            };
+
+            var random = new Random(DateTime.Now.Millisecond);
+
+            for (int i = 0; i < shuffleCount; i++)
+            {
+                board.MoveTile(map[random.Next(0, 4)]);
+                DisplayBoard(board);
+                //Task.Delay(5).Wait();
             }
         }
     }
