@@ -6,7 +6,7 @@ namespace Waiting4Rain.Games.TileGame
 {
     public class Board : List<List<string>>
     {
-        public const string FreeCell = "__";
+        public const string FreeCell = "_";
 
         public void MoveTile(string direction)
         {
