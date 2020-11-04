@@ -13,14 +13,16 @@ namespace Waiting4Rain.ConsoleStudy
     {
         static void Main(string[] args)
         {
-            Console.SetWindowSize(9, 7);
+            Console.SetWindowSize(16, 14);
             Console.CursorVisible = false;
 
             var board = new Board
             {
-                new List<string>{ "A", "B", "C" },
-                new List<string>{ "D", "E", "F" },
-                new List<string>{ "G", "H", "_" },
+                new List<string>{ "A", "B", "C", "D", "E" },
+                new List<string>{ "F", "G", "H", "I", "J" },
+                new List<string>{ "K", "L", "M", "N", "O" },
+                new List<string>{ "P", "Q", "R", "S", "T" },
+                new List<string>{ "U", "V", "W", "X", "_" }
             };
 
             while (true)
