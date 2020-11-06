@@ -25,16 +25,18 @@ namespace Waiting4Rain.ConsoleStudy
                 new List<string>{ "U", "V", "W", "X", "_" }
             };
 
+            DisplayBoard(board);
+            Task.Delay(3000).Wait();
             Shuffle(board, 2500);
 
             while (true)
             {
                 DisplayBoard(board);
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.UpArrow) board.MoveTile("down");
-                if (key == ConsoleKey.RightArrow) board.MoveTile("left");
-                if (key == ConsoleKey.DownArrow) board.MoveTile("up");
-                if (key == ConsoleKey.LeftArrow) board.MoveTile("right");
+                if (key == ConsoleKey.UpArrow) board.MoveTile("up");
+                if (key == ConsoleKey.RightArrow) board.MoveTile("right");
+                if (key == ConsoleKey.DownArrow) board.MoveTile("down");
+                if (key == ConsoleKey.LeftArrow) board.MoveTile("left");
             }
         }
 
@@ -69,6 +71,11 @@ namespace Waiting4Rain.ConsoleStudy
                 DisplayBoard(board);
                 //Task.Delay(5).Wait();
             }
+        }
+
+        private static void M()
+        {
+
         }
     }
 }
