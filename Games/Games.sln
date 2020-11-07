@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waiting4Rain.Games.TileGame
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waiting4Rain.ConsoleStudy", "Waiting4Rain.ConsoleStudy\Waiting4Rain.ConsoleStudy.csproj", "{6EC5932A-894C-4BE6-958B-1F3EF81192C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witing4Rain.ReflectonStudy", "Witing4Rain.ReflectonStudy\Witing4Rain.ReflectonStudy.csproj", "{2E73C172-E0B3-466B-BA07-D4D6970496B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waiting4Rain.ReflectonStudy", "Waiting4Rain.ReflectonStudy\Waiting4Rain.ReflectonStudy.csproj", "{1D512ABB-0FB4-430E-BA38-CEA1C029CD0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{6EC5932A-894C-4BE6-958B-1F3EF81192C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EC5932A-894C-4BE6-958B-1F3EF81192C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EC5932A-894C-4BE6-958B-1F3EF81192C3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E73C172-E0B3-466B-BA07-D4D6970496B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E73C172-E0B3-466B-BA07-D4D6970496B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E73C172-E0B3-466B-BA07-D4D6970496B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E73C172-E0B3-466B-BA07-D4D6970496B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D512ABB-0FB4-430E-BA38-CEA1C029CD0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D512ABB-0FB4-430E-BA38-CEA1C029CD0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D512ABB-0FB4-430E-BA38-CEA1C029CD0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D512ABB-0FB4-430E-BA38-CEA1C029CD0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

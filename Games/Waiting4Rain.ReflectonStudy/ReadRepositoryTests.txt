@@ -1,0 +1,2236 @@
+﻿// <copyright file="ReadRepositoryTest.cs" company="Next Plc">
+// Copyright Next Plc 2019.
+// </copyright>
+
+namespace Next.Product.SOA.ItemSizingManagement.Repository.Test
+{
+    using System;
+    using DataAccess.Interface;
+    using Entities;
+    using FluentAssertions;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NSubstitute;
+
+    [TestClass]
+    public class ReadRepositoryTest
+    {
+        private const string MainQueryConnectionString = "MainQueryConnectionString";
+        private const string WeeklyQueryConnectionString = "WeeklyQueryConnectionString";
+
+        private const string GetSystemLookUpByLookUpKeySystemIdSproc = "[ItemSizing].[SystemLookUp_Read_ByLookUpKey_SystemId]";
+
+        private const string GetItemOptionsSproc = "[ItemSizing].[ItemOption_Read_ByItemNumber]";
+        private const string GetItemOptionSproc = "[ItemSizing].[ItemOption_Read_ByItemNumber_OptionNumber]";
+        private const string GetItemOptionDetailSproc = "[ItemSizing].[ItemOptionDetail_Read_ByItemNumber_OptionNumber]";
+
+        private const string GetItemSeasonOptionsSproc = "[ItemSizing].[ItemSeasOpt_Read_ByItemNumber]";
+        private const string GetItemSeasonOptionsBySeasonCodeSproc = "[ItemSizing].[ItemSeasOpt_Read_ByItemNumber_SeasonCode]";
+        private const string GetItemSeasonOptionsByOptionNumberSproc = "[ItemSizing].[ItemSeasOpt_Read_ByItemNumber_OptionNumber]";
+
+        private const string GetItemOptionInternationalSizesSproc = "[ItemSizing].[ItemOptionInternationalSize_Read_ByItemNumber]";
+        private const string GetItemOptionInternationalSizesByCountryCodeSproc = "[ItemSizing].[ItemOptionInternationalSize_Read_ByItemNumber_CountryCode]";
+        private const string GetItemOptionInternationalSizesByOptionNumberSproc = "[ItemSizing].[ItemOptionInternationalSize_Read_ByItemNumber_OptionNumber]";
+
+        private const string GetContractHeadersByItemNumberSproc = "[ItemSizing].[ContractHeader_Read_ByItemNumber]";
+
+        private const string GetItemCostingsByItemNumberSeasonCodeSproc = "[ItemSizing].[ItemCosting_Read_ByItemNumber_SeasonCode]";
+
+        private const string GetRosaItemByItemNumberSeasonCodeSproc = "[ItemSizing].[RosaItem_Read_ByItemNumber_SeasonCode]";
+
+        private const string GetItemDirectorySalesByItemNumberOutletSproc = "[ItemSizing].[DirIoSalesWk_Read_ByItemNumber_Outlet]";
+
+        private const string GetSeasonBySeasonCodeSproc = "[ItemSizing].[Season_Read_BySeasonCode]";
+
+        private const string GetSalesWkItemOptByItemNumberAYearASeasonSproc = "[ItemSizing].[GetSalesWkItemOpt_ByItemNumber_AYear_ASeason]";
+
+        private const string GetSizePlanPercByPlanCodeSproc = "[ItemSizing].[SizePlanPerc_Read_ByPlanCode]";
+
+        private const string GetSeasonPhaseBySeasonCodeSproc = "[ItemSizing].[SeasonPhase_Read_BySeasonCode]";
+
+        private const string GetItemWeekOptByItemNumberSeasonCodeSproc = "[ItemSizing].[ItemWeekOpt_Read_ByItemNumber_SeasonCode]";
+
+        private const string GetItemDetailByItemNumberSproc = "[ItemSizing].[ItemDetail_Read_ByItemNumber]";
+
+        private const string GetChainSeasByChainSeasonCodeSproc = "[ItemSizing].[ChainSeas_Read_ByChain_SeasonCode]";
+        private const string GetVatRateBySeasonCodeVatCodeSproc = "[ItemSizing].[VatRates_Read_BySeasonCode_VatCode]";
+        private const string GetSeasonPricesByItemNumberSeasonCodeSproc = "[ItemSizing].[SeasonPrices_Read_ByItemNumber_SeasonCode]";
+        private const string GetItemSeasPhseOptByItemNumberSeasonCodeSproc = "[ItemSizing].[ItemSeasPhseOpt_Read_ByItemNumber_SeasonCode]";
+        private const string GetItemSeasonPhaseByItemNumberSeasonCodeSproc = "[ItemSizing].[ItemSeasonPhase_Read_ByItemNumber_SeasonCode]";
+
+        #region Constructor
+
+        [TestMethod]
+        public void Constructor_QueryRepositoryNull_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = null;
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+            IReadRepository repository;
+
+            // Act
+            Action action = () =>
+                repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("queryRepositoryFactory");
+        }
+
+        [TestMethod]
+        public void Constructor_ConfigurationNull_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = null;
+
+            IReadRepository repository;
+
+            // Act
+            Action action = () =>
+                repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
+        }
+
+        [TestMethod]
+        public void Constructor_MainQueryConnectionStringMissing_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+
+            configuration.GetConnectionString("MainQuery").Returns(string.Empty);
+
+            IReadRepository repository;
+
+            // Act
+            Action action = () =>
+                repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("MainQuery");
+        }
+
+        [TestMethod]
+        public void Constructor_WeeklyQueryConnectionStringMissing_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+
+            configuration.GetConnectionString("MainQuery").Returns(MainQueryConnectionString);
+            configuration.GetConnectionString("WeeklyQuery").Returns(string.Empty);
+
+            IReadRepository repository;
+
+            // Act
+            Action action = () =>
+                repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("WeeklyQuery");
+        }
+
+        [TestMethod]
+        public void Constructor_ParametersComplete_RepositoryFactoriesCalled()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+
+            queryRepositoryFactory.GetQueryRepository(MainQueryConnectionString)
+                .ReturnsForAnyArgs(Substitute.For<IQueryRepository>());
+
+            queryRepositoryFactory.GetQueryRepository(WeeklyQueryConnectionString)
+                .ReturnsForAnyArgs(Substitute.For<IQueryRepository>());
+
+            configuration.GetConnectionString("MainQuery").Returns(MainQueryConnectionString);
+            configuration.GetConnectionString("WeeklyQuery").Returns(WeeklyQueryConnectionString);
+
+            IReadRepository repository;
+
+            // Act
+            repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            queryRepositoryFactory.Received().GetQueryRepository(MainQueryConnectionString);
+            queryRepositoryFactory.Received().GetQueryRepository(WeeklyQueryConnectionString);
+        }
+
+        [TestMethod]
+        public void Constructor_ParametersComplete_InstanceNotNull()
+        {
+            // Arrange
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+
+            queryRepositoryFactory.GetQueryRepository(MainQueryConnectionString)
+                .ReturnsForAnyArgs(Substitute.For<IQueryRepository>());
+
+            queryRepositoryFactory.GetQueryRepository(WeeklyQueryConnectionString)
+                .ReturnsForAnyArgs(Substitute.For<IQueryRepository>());
+
+            configuration.GetConnectionString("MainQuery").Returns(MainQueryConnectionString);
+            configuration.GetConnectionString("WeeklyQuery").Returns(WeeklyQueryConnectionString);
+
+            IReadRepository repository;
+
+            // Act
+            repository = new ReadRepository(queryRepositoryFactory, configuration);
+
+            // Assert
+            repository.Should().NotBeNull();
+            repository.Should().BeAssignableTo(typeof(IReadRepository));
+        }
+
+        #endregion
+
+        #region GetSystemLookUp
+
+        [TestMethod]
+        public void GetSystemLookUp_LookUpKeyIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string lookUpKey = null;
+            string systemId = "TES";
+
+            // Act
+            Action action = () => repository.GetSystemLookUp(lookUpKey, systemId);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("lookUpKey");
+        }
+
+        [TestMethod]
+        public void GetSystemLookUp_SystemIdIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string lookUpKey = "test_key";
+            string systemId = null;
+
+            // Act
+            Action action = () => repository.GetSystemLookUp(lookUpKey, systemId);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("systemId");
+        }
+
+        [TestMethod]
+        public void GetSystemLookUp_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string lookUpKey = "test_key";
+            string systemId = "TES";
+
+            // Act
+            repository.GetSystemLookUp(lookUpKey, systemId);
+
+            // Assert
+            queryRepository.Received().QueryFirstOrDefault<SystemLookUp>(
+                GetSystemLookUpByLookUpKeySystemIdSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("LookUpKey").GetValue(x) == lookUpKey &&
+                                    (string)x.GetType().GetProperty("SystemId").GetValue(x) == systemId));
+        }
+
+        #endregion
+
+        #region GetItemOptions
+
+        [TestMethod]
+        public void GetItemOptions_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemOptions(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptions_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOptions(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptions_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+
+            // Act
+            repository.GetItemOptions(itemNumber);
+
+            // Assert
+            queryRepository.Received().Query<ItemOption>(
+                GetItemOptionsSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber));
+        }
+
+        #endregion
+
+        #region GetItemOption
+
+        [TestMethod]
+        public void GetItemOption_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOption(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOption_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOption(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOption_OptionNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemOption(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOption_OptionNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOption(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOption_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = "01";
+
+            // Act
+            repository.GetItemOption(itemNumber, optionNumber);
+
+            // Assert
+            queryRepository.Received().QueryFirstOrDefault<ItemOption>(
+                GetItemOptionSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                                                                                                          (string)x.GetType().GetProperty("OptionNumber").GetValue(x) == optionNumber));
+        }
+
+        #endregion
+
+        #region GetItemOptionDetail
+
+        [TestMethod]
+        public void GetItemOptionDetail_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOptionDetail(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionDetail_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOptionDetail(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionDetail_OptionNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemOptionDetail(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionDetail_OptionNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOptionDetail(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionDetail_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = "01";
+
+            // Act
+            repository.GetItemOptionDetail(itemNumber, optionNumber);
+
+            // Assert
+            queryRepository.Received().QueryFirstOrDefault<ItemOptionDetail>(
+                GetItemOptionDetailSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                                                                                                                (string)x.GetType().GetProperty("OptionNumber").GetValue(x) == optionNumber));
+        }
+
+        #endregion
+
+        #region GetItemSeasonOption
+
+        [TestMethod]
+        public void GetItemSeasonOption_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptions(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOption_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptions(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOption_ParametersComplete_CallsQueryRepository()
+        {
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            string itemNumber = "123456";
+            repository.GetItemSeasonOptions(itemNumber);
+            queryRepository.Received().Query<ItemSeasOpt>(
+                GetItemSeasonOptionsSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber));
+        }
+        #endregion
+
+        #region GetItemSeasonOptions
+
+        [TestMethod]
+        public void GetItemSeasonOptions_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+
+            // Act
+            repository.GetItemSeasonOptions(itemNumber);
+
+            // Assert
+            queryRepository.Received().Query<ItemSeasOpt>(
+                GetItemSeasonOptionsSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber));
+        }
+
+        #endregion
+
+        #region GetItemSeasonOptionsBySeasonCode
+
+        [TestMethod]
+        public void GetItemSeasonOptionsBySeasonCode_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = "91";
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsBySeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsBySeasonCode_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = "91";
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsBySeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsBySeasonCode_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsBySeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsBySeasonCode_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsBySeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsBySeasonCode_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "91";
+
+            // Act
+            repository.GetItemSeasonOptionsBySeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.Received().Query<ItemSeasOpt>(
+                GetItemSeasonOptionsBySeasonCodeSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                                                                                                                (string)x.GetType().GetProperty("SeasonCode").GetValue(x) == seasonCode));
+        }
+
+        #endregion
+
+        #region GetItemSeasonOptionsByOptionNumber
+
+        [TestMethod]
+        public void GetItemSeasonOptionsByOptionNumber_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsByOptionNumber_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsByOptionNumber_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsByOptionNumber_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemSeasonOptionsByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonOptionsByOptionNumber_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = "01";
+
+            // Act
+            repository.GetItemSeasonOptionsByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            queryRepository.Received().Query<ItemSeasOpt>(
+                GetItemSeasonOptionsByOptionNumberSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                                                                                                                (string)x.GetType().GetProperty("OptionNumber").GetValue(x) == optionNumber));
+        }
+
+        #endregion
+
+        #region GetItemOptionInternationalSizes
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizes_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizes(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizes_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizes(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizes_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+
+            // Act
+            repository.GetItemOptionInternationalSizes(itemNumber);
+
+            // Assert
+            queryRepository.Received().Query<ItemOptionInternationalSize>(
+                GetItemOptionInternationalSizesSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber));
+        }
+
+        #endregion
+
+        #region GetItemOptionInternationalSizesByCountryCode
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByCountryCode_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string countryCode = "GB";
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByCountryCode(itemNumber, countryCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByCountryCode_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string countryCode = "GB";
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByCountryCode(itemNumber, countryCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByCountryCode_CountryCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string countryCode = null;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByCountryCode(itemNumber, countryCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("countryCode");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByCountryCode_CountryCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string countryCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByCountryCode(itemNumber, countryCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("countryCode");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByCountryCode_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string countryCode = "GB";
+
+            // Act
+            repository.GetItemOptionInternationalSizesByCountryCode(itemNumber, countryCode);
+
+            // Assert
+            queryRepository.Received().Query<ItemOptionInternationalSize>(
+                GetItemOptionInternationalSizesByCountryCodeSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                    (string)x.GetType().GetProperty("CountryCode").GetValue(x) == countryCode));
+        }
+
+        #endregion
+
+        #region GetItemOptionInternationalSizesByOptionNumber
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByOptionNumber_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByOptionNumber_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string optionNumber = "01";
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByOptionNumber_OptionNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByOptionNumber_OptionNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemOptionInternationalSizesByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("optionNumber");
+        }
+
+        [TestMethod]
+        public void GetItemOptionInternationalSizesByOptionNumber_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string optionNumber = "01";
+
+            // Act
+            repository.GetItemOptionInternationalSizesByOptionNumber(itemNumber, optionNumber);
+
+            // Assert
+            queryRepository.Received().Query<ItemOptionInternationalSize>(
+                GetItemOptionInternationalSizesByOptionNumberSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                    (string)x.GetType().GetProperty("OptionNumber").GetValue(x) == optionNumber));
+        }
+
+        #endregion
+
+        #region GetContractHeadersByItemNumber
+        /// GetContractHeadersByItemNumber throws ArgumentNullException when itemNumber is null.
+        [TestMethod]
+        public void GetContractHeadersByItemNumber_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+
+            // Act
+            Action action = () => repository.GetContractHeadersByItemNumber(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        /// GetContractHeadersByItemNumber throws ArgumentNullException when itemNumber is empty.
+        [TestMethod]
+        public void GetContractHeadersByItemNumber_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetContractHeadersByItemNumber(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        /// GetContractHeadersByItemNumber calls query repository when parameters complete.
+        [TestMethod]
+        public void GetContractHeadersByItemNumber_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+
+            // Act
+            repository.GetContractHeadersByItemNumber(itemNumber);
+
+            // Assert
+            queryRepository.Received().Query<ContractHeader>(
+                GetContractHeadersByItemNumberSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber));
+        }
+
+        #endregion
+
+        #region GetItemCostings
+        /// GetItemCostings throws ArgumentNullException when itemNumber is null.
+        [TestMethod]
+        public void GetItemCostings_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetItemCostings(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetItemCostings throws ArgumentNullException when itemNumber is empty.
+        [TestMethod]
+        public void GetItemCostings_ItemNumberEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetItemCostings(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetItemCostings throws ArgumentNullException when seasonCode is null.
+        [TestMethod]
+        public void GetItemCostings_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetItemCostings(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        /// GetItemCostings throws ArgumentNullException when seasonCode is empty.
+        [TestMethod]
+        public void GetItemCostings_SeasonCodeEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemCostings(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        /// GetItemCostings calls query repository when parameters complete.
+        [TestMethod]
+        public void GetItemCostings_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "01";
+
+            // Act
+            repository.GetItemCostings(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.Received().Query<ItemCosting>(
+                GetItemCostingsByItemNumberSeasonCodeSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber &&
+                                    (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        #endregion
+
+        #region GetRosaItem
+        /// GetRosaItem throws ArgumentNullException when itemNumber is null.
+        [TestMethod]
+        public void GetRosaItem_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetRosaItemByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetRosaItem throws ArgumentNullException when itemNumber is empty.
+        [TestMethod]
+        public void GetRosaItem_ItemNumberEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetRosaItemByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetRosaItem throws ArgumentNullException when seasonCode is null.
+        [TestMethod]
+        public void GetRosaItem_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetRosaItemByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        /// GetRosaItem throws ArgumentNullException when seasonCode is empty.
+        [TestMethod]
+        public void GetRosaItem_SeasonCodeEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetRosaItemByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        /// GetRosaItem calls query repository when parameters complete.
+        [TestMethod]
+        public void GetRosaItem_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "01";
+
+            // Act
+            repository.GetRosaItemByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.Received().QueryFirstOrDefault<RosaItem>(
+                GetRosaItemByItemNumberSeasonCodeSproc,
+               Arg.Is<object>(x => (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber &&
+                                   (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        #endregion
+
+        #region GetSeasonBySeasonCode
+        /// GetSeasonBySeasonCode calls query repository when parameters complete
+        [TestMethod]
+        public void GetSeasonBySeasonCode_ParametersComplete_CallsQueryRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            string seasonCode = "82";
+
+            // Act
+            repository.GetSeasonBySeasonCode(seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs().QueryFirstOrDefault<Season>(GetSeasonBySeasonCodeSproc, Arg.Is<object>(x => (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        /// GetSeasonBySeasonCode throws ArgumentNullException when seasonCode is null
+        [TestMethod]
+        public void GetSeasonBySeasonCode_ParametersNull_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetSeasonBySeasonCode(seasonCode);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        /// GetSeasonBySeasonCode throws ArgumentNullException when seasonCode is empty
+        [TestMethod]
+        public void GetSeasonBySeasonCode_ParametersEmpty_ThrowsNullArgumentException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetSeasonBySeasonCode(seasonCode);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonCode));
+        }
+
+        #endregion
+
+        #region GetItemDirectorySalesByItemNumberOutlet
+        /// GetItemDirectorySaleByItemNumberOutlet throws ArgumentNullException when itemNumber is null.
+        [TestMethod]
+        public void GetItemDirectorySalesByItemNumberOutlet_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string outlet = null;
+
+            // Act
+            Action action = () => repository.GetItemDirectorySalesByItemNumberOutlet(itemNumber, outlet);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetItemDirectorySaleByItemNumberOutlet throws ArgumentNullException when itemNumber is empty.
+        [TestMethod]
+        public void GetItemDirectorySalesByItemNumberOutlet_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string outlet = null;
+
+            // Act
+            Action action = () => repository.GetItemDirectorySalesByItemNumberOutlet(itemNumber, outlet);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetItemDirectorySaleByItemNumberOutlet throws ArgumentNullException when outlet is null.
+        [TestMethod]
+        public void GetItemDirectorySalesByItemNumberOutlet_OutletIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string outlet = null;
+
+            // Act
+            Action action = () => repository.GetItemDirectorySalesByItemNumberOutlet(itemNumber, outlet);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(outlet));
+        }
+
+        /// GetItemDirectorySaleByItemNumberOutlet throws ArgumentNullException when outlet is empty.
+        [TestMethod]
+        public void GetItemDirectorySalesByItemNumberOutlet_OutletIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string outlet = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemDirectorySalesByItemNumberOutlet(itemNumber, outlet);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(nameof(outlet));
+        }
+
+        [TestMethod]
+        public void GetItemDirectorySalesByItemNumberOutlet_ParametersComplete_CallsRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string outlet = "*G52";
+
+            // Act
+            repository.GetItemDirectorySalesByItemNumberOutlet(itemNumber, outlet);
+
+            // Assert
+            queryRepository.Received().Query<ItemDirectorySale>(
+                GetItemDirectorySalesByItemNumberOutletSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber &&
+                                    (string)x.GetType().GetProperty("outlet").GetValue(x) == outlet));
+        }
+
+        #endregion
+
+        #region GetSalesWeekItemOptionByItemNumberYearSeason
+        /// GetSalesWeekItemOptionByItemNumberYearSeason calls repository with parameters and stored procedure name when parameters complete.
+        [TestMethod]
+        public void GetSalesWeekItemOptionByItemNumberYearSeason_ParametersComplete()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            var itemNumber = "100205";
+            var year = "2019";
+            var seasonNumber = "1";
+
+            // Act
+            repository.GetSalesWeekItemOptionByItemNumberYearSeason(itemNumber, year, seasonNumber);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs().Query<ItemRetailSale>(
+                GetSalesWkItemOptByItemNumberAYearASeasonSproc,
+                Arg.Is<object>(x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                                    (string)x.GetType().GetProperty("AYear").GetValue(x) == year &&
+                                    (string)x.GetType().GetProperty("ASeason").GetValue(x) == seasonNumber));
+        }
+
+        /// GetSalesWeekItemOptionByItemNumberYearSeason throws ArgumentNullException when item number is empty.
+        [TestMethod]
+        public void GetSalesWeekItemOptionByItemNumberYearSeason_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            var itemNumber = string.Empty;
+            var year = "2019";
+            var seasonNumber = "1";
+
+            // Act
+            Action action = () => repository.GetSalesWeekItemOptionByItemNumberYearSeason(itemNumber, year, seasonNumber);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be(nameof(itemNumber));
+        }
+
+        /// GetSalesWeekItemOptionByItemNumberYearSeason throws ArgumentNullException when year is empty.
+        [TestMethod]
+        public void GetSalesWeekItemOptionByItemNumberYearSeason_YearIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            var itemNumber = "100205";
+            var year = string.Empty;
+            var seasonNumber = "1";
+
+            // Act
+            Action action = () => repository.GetSalesWeekItemOptionByItemNumberYearSeason(itemNumber, year, seasonNumber);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be(nameof(year));
+        }
+
+        /// GetSalesWeekItemOptionByItemNumberYearSeason throws ArgumentNullException when season number is empty.
+        [TestMethod]
+        public void GetSalesWeekItemOptionByItemNumberYearSeason_SeasonNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+            IReadRepository repository = GetReadRepository(queryRepository);
+            var itemNumber = "100205";
+            var year = "2019";
+            var seasonNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetSalesWeekItemOptionByItemNumberYearSeason(itemNumber, year, seasonNumber);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be(nameof(seasonNumber));
+        }
+
+        #endregion
+
+        #region GetSizePlanPerc
+
+        [TestMethod]
+        public void GetSizePlanPerc_PlanCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string planCode = null;
+
+            // Act
+            Action action = () => repository.GetSizePlanPercByPlanCode(planCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("planCode");
+        }
+
+        [TestMethod]
+        public void GetSizePlanPerc_PlanCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string planCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetSizePlanPercByPlanCode(planCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("planCode");
+        }
+
+        [TestMethod]
+        public void GetSizePlanPerc_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            var planCode = "AB000001";
+
+            // Act
+            repository.GetSizePlanPercByPlanCode(planCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs().Query<SizePlanPerc>(GetSizePlanPercByPlanCodeSproc, Arg.Is<object>(x => (string)x.GetType().GetProperty("PlanCode").GetValue(x) == planCode));
+        }
+
+        #endregion
+
+        #region GetSeasonPhase
+
+        [TestMethod]
+        public void GetSeasonPhase_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetSeasonPhaseBySeasonCode(seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetSeasonPhase_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetSeasonPhaseBySeasonCode(seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetSeasonPhase_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            var seasonCode = "01";
+
+            // Act
+            repository.GetSeasonPhaseBySeasonCode(seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs().Query<SeasonPhase>(GetSeasonPhaseBySeasonCodeSproc, Arg.Is<object>(x => (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        #endregion
+
+        #region GetItemWeekOpt
+
+        [TestMethod]
+        public void GetItemWeekOpt_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => repository.GetItemWeekOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemWeekOpt_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => repository.GetItemWeekOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemWeekOpt_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => repository.GetItemWeekOptByItemNumberSeasonCode(itemNumber, itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemWeekOpt_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemWeekOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemWeekOpt_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "01";
+
+            // Act
+            repository.GetItemWeekOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .Query<ItemWeekOpt>(GetItemWeekOptByItemNumberSeasonCodeSproc, Arg.Is<object>(x =>
+                    (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber &&
+                   (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        #endregion
+
+        #region GetItemDetail
+
+        [TestMethod]
+        public void GetItemDetail_ItemNumberIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+
+            // Act
+            Action action = () => repository.GetItemDetailByItemNumber(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        #endregion
+
+        [TestMethod]
+        public void GetItemDetail_ItemNumberIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+
+            // Act
+            Action action = () => repository.GetItemDetailByItemNumber(itemNumber);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemDetail_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            IQueryRepository queryRepository = Substitute.For<IQueryRepository>();
+
+            IReadRepository repository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+
+            // Act
+            repository.GetItemDetailByItemNumber(itemNumber);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .QueryFirstOrDefault<ItemDetail>(GetItemDetailByItemNumberSproc, Arg.Is<object>(x =>
+                    (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber));
+        }
+
+        [TestMethod]
+        public void GetChainSeas_ChainIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string chain = null;
+            string seasonCode = "91";
+
+            // Act
+            Action action = () => readRepository.GetChainSeasByChainSeasonCode(chain, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("chain");
+        }
+
+        [TestMethod]
+        public void GetChainSeas_ChainIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string chain = string.Empty;
+            string seasonCode = "91";
+
+            // Act
+            Action action = () => readRepository.GetChainSeasByChainSeasonCode(chain, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("chain");
+        }
+
+        [TestMethod]
+        public void GetChainSeas_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string chain = "A";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => readRepository.GetChainSeasByChainSeasonCode(chain, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetChainSeas_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string chain = "A";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => readRepository.GetChainSeasByChainSeasonCode(chain, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetChainSeas_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string chain = "A";
+            string seasonCode = "91";
+
+            // Act
+            readRepository.GetChainSeasByChainSeasonCode(chain, seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .QueryFirstOrDefault<ChainSeas>(GetChainSeasByChainSeasonCodeSproc, Arg.Is<object>(x =>
+                    (string)x.GetType().GetProperty("chain").GetValue(x) == chain));
+        }
+
+        [TestMethod]
+        public void GetVATRate_SeasonCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string seasonCode = null;
+            string vatCode = "A";
+
+            // Act
+            Action action = () => readRepository.GetVatRateBySeasonCodeVatCode(seasonCode, vatCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetVATRate_SeasonCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string seasonCode = string.Empty;
+            string vatCode = "A";
+
+            // Act
+            Action action = () => readRepository.GetVatRateBySeasonCodeVatCode(seasonCode, vatCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetVATRate_VATCodeIsNull_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string seasonCode = "91";
+            string vatCode = null;
+
+            // Act
+            Action action = () => readRepository.GetVatRateBySeasonCodeVatCode(seasonCode, vatCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("vatCode");
+        }
+
+        [TestMethod]
+        public void GetVATRate_VATCodeIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string seasonCode = "91";
+            string vatCode = string.Empty;
+
+            // Act
+            Action action = () => readRepository.GetVatRateBySeasonCodeVatCode(seasonCode, vatCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("vatCode");
+        }
+
+        [TestMethod]
+        public void GetVATRate_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string seasonCode = "91";
+            string vatCode = "A";
+
+            // Act
+            readRepository.GetVatRateBySeasonCodeVatCode(seasonCode, vatCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .QueryFirstOrDefault<VatRate>(GetVatRateBySeasonCodeVatCodeSproc, Arg.Is<object>(x =>
+                    (string)x.GetType().GetProperty("seasonCode").GetValue(x) == seasonCode));
+        }
+
+        [TestMethod]
+        public void GetSeasonPrices_ItemNumberIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetSeasonPricesByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetSeasonPrices_ItemNumberIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetSeasonPricesByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetSeasonPrices_SeasonCodeIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => readRepository.GetSeasonPricesByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetSeasonPrices_SeasonCodeIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => readRepository.GetSeasonPricesByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetSeasonPrices_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "01";
+
+            // Act
+            readRepository.GetSeasonPricesByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .Query<SeasonPrice>(GetSeasonPricesByItemNumberSeasonCodeSproc, Arg.Is<object>(x =>
+                    (string)x.GetType().GetProperty("itemNumber").GetValue(x) == itemNumber));
+        }
+
+        [TestMethod]
+        public void GetItemSeasPhseOpt_ItemNumberIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetItemSeasPhseOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasPhseOpt_ItemNumberIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetItemSeasPhseOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasPhseOpt_SeasonCodeIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => readRepository.GetItemSeasPhseOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasPhseOpt_SeasonCodeIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => readRepository.GetItemSeasPhseOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasPhseOpt_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "123456";
+            string seasonCode = "01";
+
+            // Act
+            readRepository.GetItemSeasPhseOptByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .Query<ItemSeasPhseOpt>(
+                    GetItemSeasPhseOptByItemNumberSeasonCodeSproc,
+                Arg.Is<object>(
+                    x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                         (string)x.GetType().GetProperty("SeasonCode").GetValue(x) == seasonCode));
+        }
+
+        #region ItemSeasonPhase
+        [TestMethod]
+        public void GetItemSeasonPhase_ItemNumberIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = null;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetItemSeasonPhaseByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonPhase_ItemNumberIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = string.Empty;
+            string seasonCode = "01";
+
+            // Act
+            Action action = () => readRepository.GetItemSeasonPhaseByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("itemNumber");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonPhase_SeasonCodeIsNull_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "100001";
+            string seasonCode = null;
+
+            // Act
+            Action action = () => readRepository.GetItemSeasonPhaseByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonPhase_SeasonCodeIsEmpty_ThrowsArgumentnullException()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "100001";
+            string seasonCode = string.Empty;
+
+            // Act
+            Action action = () => readRepository.GetItemSeasonPhaseByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            action.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("seasonCode");
+        }
+
+        [TestMethod]
+        public void GetItemSeasonPhase_ParametersComplete_CallsCommandRepository()
+        {
+            // Arrange
+            var queryRepository = Substitute.For<IQueryRepository>();
+            var readRepository = GetReadRepository(queryRepository);
+
+            string itemNumber = "100001";
+            string seasonCode = "01";
+
+            // Act
+            readRepository.GetItemSeasonPhaseByItemNumberSeasonCode(itemNumber, seasonCode);
+
+            // Assert
+            queryRepository.ReceivedWithAnyArgs()
+                .Query<ItemSeasonPhase>(
+                    GetItemSeasonPhaseByItemNumberSeasonCodeSproc,
+                Arg.Is<object>(
+                    x => (string)x.GetType().GetProperty("ItemNumber").GetValue(x) == itemNumber &&
+                         (string)x.GetType().GetProperty("SeasonCode").GetValue(x) == seasonCode));
+        }
+        #endregion
+
+        #region Utilities
+
+        private IReadRepository GetReadRepository(IQueryRepository queryRepository)
+        {
+            IQueryRepositoryFactory queryRepositoryFactory = Substitute.For<IQueryRepositoryFactory>();
+            IConfiguration configuration = Substitute.For<IConfiguration>();
+
+            queryRepositoryFactory.GetQueryRepository(MainQueryConnectionString)
+                .ReturnsForAnyArgs(queryRepository);
+
+            queryRepositoryFactory.GetQueryRepository(WeeklyQueryConnectionString)
+                .ReturnsForAnyArgs(queryRepository);
+
+            configuration.GetConnectionString("MainQuery").Returns(MainQueryConnectionString);
+            configuration.GetConnectionString("WeeklyQuery").Returns(WeeklyQueryConnectionString);
+
+            return new ReadRepository(queryRepositoryFactory, configuration);
+        }
+
+        #endregion
+    }
+}

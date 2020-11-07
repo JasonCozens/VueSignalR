@@ -1,15 +1,41 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
 namespace Witing4Rain.ReflectonStudy
 {
-    public class UnitTest1
+    public class TestRepository{
+        public TestRepository() { }
+        public TestRepository(string message) {
+            Debug.WriteLine(message);
+        }
+    }
+
+    public class ReflectionExamples
     {
         [Fact]
-        public void TestListAssemblies()
+        public void TestRepositoryConstructor()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach (var type in assembly.ExportedTypes)
+            {
+                if (type.Name == "TestRepository")
+                {
+                    IEnumerable<ConstructorInfo> ctors = type.GetTypeInfo().
+                        DeclaredMembers.
+                        Where(mi => mi is ConstructorInfo).
+                        Select(mi => (ConstructorInfo)mi);
+                    var tr = ctors.ToList()[1].Invoke(new object[] { "HELLO" });
+                    Debug.WriteLine("STOP");
+                }
+            }
+        }
+
+        [Fact]
+        public void ListAssemblies()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
